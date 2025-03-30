@@ -37,7 +37,7 @@ export default function WaitForConfirmation() {
   
           // si l'app à pu vérifier l'email a été vérifié càd clické sur le lien alors 
           // on arrête le polling et on redirige vers la page de login
-          if (data.emailVerified) {
+          if (data.isEmailActivated) {
             clearInterval(interval);
   
             await SecureStore.setItemAsync('autoLoginEmail', pendingEmail);

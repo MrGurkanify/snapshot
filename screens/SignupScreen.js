@@ -19,7 +19,7 @@ import FormButton from './../components/FormButton';
 import TextButtonLink from '../components/TextButtonLink';
 import FormFrame from '../components/FormFrame';
 
-import { API_BASE_URL } from '@/lib/api';
+import { API_BASE_URL } from '../lib/api';
 
 
 // la class absolute permet de mettre l'image en background arrière plan derrière les autres composants 
@@ -49,9 +49,12 @@ export default function SignupScreen() {
                 body: JSON.stringify({ username, email, password }),
               });
             setIsLoading(true);
-
+            console.log('res ', res.status);
             const data = await res.json();
-
+            console.log('data ',data);
+            console.log('res ', res.status);
+            
+            
             if (!res.ok) {
             console.warn('Signup error:', data.message);
             Toast.show({

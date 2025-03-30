@@ -99,15 +99,17 @@ useFocusEffect(
             // c'est une vérif la plus importante 
             // car si pas de réponse ok du backend ca veut dire que le login a échoué
             // ou que le serveur est offline 
-            // si le if ne trigger pas, c'est que le login est successfull
+            // ou que le user n'existe pas
+            // si ce if ne trigger pas, c'est que le login est successfull
             if (!res.ok) {
-              console.warn('Login error:', data.message);
+              console.log(res);
+              console.warn('❌ Login failed:', data.message);
               return;
             }
         
             console.log('✅ Login successful');
             console.log('✅ la data:', data);
-            console.log('Le Token:', data.token);
+            console.log('Le Token obtenu du backend: ', data.token);
             
             // si le login est successfull on a obtenu un token du backend
             // Sauvegarder le token dans SecureStore
