@@ -41,7 +41,7 @@ export default function SupplierScreen() {
             <TouchableOpacity className="flex-row items-center bg-black/5 p-4 rounded-xl mb-4">
               <Image source={item.image} className="w-16 h-16 rounded-lg mr-4" />
               <Text className="text-lg font-semibold">{item.title}</Text>
-            </TouchableOpacity,>
+            </TouchableOpacity>
           )}
         />
       </View>

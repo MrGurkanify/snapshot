@@ -1,3 +1,13 @@
+/**
+ * 📁 File : SearchBarInput.js
+ * 🛤️  Path  : ~/developpement /snapshot/components/home/SearchBarInput.js
+ * 📅 Created at : 2025-04-04
+ * 👤 Author  : William Balikel
+ * ✍️  Description : Description rapide du fichier
+ */
+
+
+
 import { View, TextInput , TouchableOpacity } from 'react-native';
 import { MagnifyingGlassIcon , XMarkIcon } from 'react-native-heroicons/solid';
 
@@ -12,10 +22,11 @@ export default function SearchBarInput({ value, onChangeText }) {
                 value={value}
                 onChangeText={onChangeText}
                 maxLength={20}
-                placeholder="Search"
+                placeholder="search"
                 placeholderTextColor="gray"
-                
-                
+                autoCapitalize='none'
+                autoCorrect={false}
+                keyboardType="default"  
             />
 
             {/* Barre verticale fine */}

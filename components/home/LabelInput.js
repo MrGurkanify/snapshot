@@ -11,18 +11,25 @@
 import { View, TextInput , Text } from 'react-native'
 
 
-export default function LabelInput({label , placeholder ,value , onChangeText}) {
+export default function LabelInput({label , placeholder=null ,value , onChangeText , color , autoCapitalize= 'sentences' , keyboardType = 'default' ,  autoCorrect= false , disabled= false }) {
   return (
     <View>
-      <Text className="uppercase text-lg font-base text-gray-500">{label}</Text>
-      <TextInput className='bg-black/5  py-3 px-3 rounded-2xl w-full mt-3 mb-3 border outline-none border-gray-300 text-2xl ' 
+      <Text className=" text-lg font-base text-gray-500">{label}</Text>
+      <TextInput className={` p-3 rounded-2xl w-full my-3 border outline-none border-gray-300 text-2xl
+              ${disabled ? 'bg-gray-200 text-gray-500' : 'bg-black/5 text-black'}` }
+                 
                  value={value} onChangeText={onChangeText} 
                  placeholderTextColor={'gray'} placeholder={placeholder} 
-                 keyboardType="email-address"
                  maxLength={30} // Limite de caractères
-                 style={{ textAlignVertical: 'center' }} // Hauteur du champ de texte
+                 style={{ textAlignVertical: 'center' }}//, // backgroundColor: color }} // Hauteur du champ de texte
+                 autoCapitalize={ autoCapitalize } // Capitalisation automatique
+                 keyboardType={keyboardType}
+                 autoCorrect={autoCorrect}
+                 autoComplete="off"
+                 editable={!disabled}
                  />
 
     </View>
   )
 }
+

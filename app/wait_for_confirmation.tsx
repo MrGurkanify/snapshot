@@ -57,7 +57,7 @@ export default function WaitForConfirmation() {
     };
   
     init();
-  
+  // cleaning up the interval dans le useEffect
     return () => clearInterval(interval);
   }, []);
   

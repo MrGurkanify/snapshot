@@ -137,10 +137,10 @@ useFocusEffect(
     return (
       <>
         {/* Background */}
-        <View className="bg-white h-full w-full flex-1 justify-center items-center">
+        {/* <View className="bg-white h-full w-full flex-1 justify-center items-center">
           <StatusBar style="light" />
           <Image className="w-full h-full absolute" source={require('./../assets/images/background.png')} />
-        </View>
+        </View> */}
     
         {/* Animations */}
         <View className="flex-row justify-around w-full absolute">

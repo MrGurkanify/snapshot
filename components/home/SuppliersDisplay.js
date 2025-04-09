@@ -1,20 +1,70 @@
-import { FlatList, Text, View } from 'react-native';
+/**
+ * 📁 File : SuppliersDisplay.js
+ * 🛤️  Path  : ~/developpement /snapshot/components/home/SuppliersDisplay.js
+ * 📅 Created at : 2025-04-04
+ * 👤 Author  : William Balikel
+ * ✍️  Description : Description rapide du fichier
+ */
 
-const data = ['Supplier 1', 'Supplier 2', 'Supplier 3', 'Supplier 4', 'Supplier 5', 'Supplier 6','Supplier 7','Supplier 8','Supplier 9'];
+import { Text ,FlatList, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { API_BASE_URL } from '../../lib/api';
+import SupplierCard from './SupplierCard';
 
-export default function SuppliersDisplay({ user }) {
+export default function SuppliersDisplay({ user , searchQuery }) {
+  const [suppliers, setSuppliers] = useState([]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchSuppliers = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/suppliers?userId=${user.userId}`, {
+          headers: {
+            Authorization: `Bearer ${user.token}`
+          }
+        });
+        
+        const data = await response.json();
+        // setSuppliers(data);
+        setSuppliers(data.suppliers);
+        console.log('📦 Données fournisseurs reçues :', data);
+
+      } catch (error) {
+        console.error('Erreur fetch suppliers:', error);
+      }
+    };
+
+    fetchSuppliers();
+  }, [user]);
+
+  // Le filtrage de la searchBar
+  // 🧠 Filtrage dynamique
+  const filteredSuppliers = suppliers.filter((supplier) => {
+    const query = searchQuery.toLowerCase();
     return (
-      <View className=" bg-blue-100 rounded-xl mb-6">
-        <FlatList
-          data={data}
-          keyExtractor={(item, index) => index.toString()}
-          renderItem={({ item }) => (
-            <View className="p-4 rounded-xl border-b border-gray-100 border">
-              <Text className=" text-xl text-gray-800">{item}</Text>
-            </View>
-          )}
-          showsVerticalScrollIndicator={false}
-        />
-      </View>
+      supplier.supplierName.toLowerCase().includes(query) ||
+      supplier.contactName?.toLowerCase().includes(query) ||
+      supplier.supplierEmail?.toLowerCase().includes(query)
     );
-  }
+  });
+  
+
+  return (
+    <View className="mb-6 h-[300px]">
+      <FlatList
+        data={filteredSuppliers}
+        keyExtractor={(item) => item._id}
+        renderItem={({ item }) => <SupplierCard supplier={item} user={user}/>}
+        showsVerticalScrollIndicator={false}
+      />
+      {suppliers.length === 0 && (
+        <Text className="text-center text-gray-400 mt-4">Aucun fournisseur trouvé</Text>
+      )}
+
+      {filteredSuppliers.length === 0 && (
+        <Text className="text-center text-gray-400 mt-4">Aucun fournisseur trouvé</Text>
+      )}
+    </View>
+  );
+}

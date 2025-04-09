@@ -5,8 +5,11 @@ import { Tabs } from 'expo-router';
 import {
   HomeIcon,
   BuildingOffice2Icon,
+  DocumentTextIcon,
   UserCircleIcon,
 } from 'react-native-heroicons/outline';
+import Toast from 'react-native-toast-message';
+
 
 import './../../global.css';
 
@@ -26,16 +29,16 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="suppliers"
+        name="products"
         options={{
-          tabBarLabel: 'Usines',
+          tabBarLabel: 'Products',
           tabBarIcon: ({ color, size }) => (
-            <BuildingOffice2Icon color={color} size={size} />
+            <DocumentTextIcon color={color} size={size} />
           ),
         }}
       />
       <Tabs.Screen
-        name="profile"
+        name="profil"
         options={{
           tabBarLabel: 'Profil',
           tabBarIcon: ({ color, size }) => <UserCircleIcon color={color} size={size} />,

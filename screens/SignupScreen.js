@@ -5,7 +5,9 @@ import {
   ScrollView,
   TouchableWithoutFeedback,
   Keyboard,
-} from 'react-native';import Animated , { FadeInUp } from 'react-native-reanimated';
+} from 'react-native';
+
+import Animated , { FadeInUp } from 'react-native-reanimated';
 import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
@@ -25,6 +27,7 @@ import { API_BASE_URL } from '../lib/api';
 // la class absolute permet de mettre l'image en background arrière plan derrière les autres composants 
 
 export default function SignupScreen() {
+
     const router = useRouter();
     const [username , setUsername] = useState('');
     const [email , setEmail] = useState('');
@@ -49,10 +52,12 @@ export default function SignupScreen() {
                 body: JSON.stringify({ username, email, password }),
               });
             setIsLoading(true);
-            console.log('res ', res.status);
+            console.log('res response du serveur: ', res.status);
+            // on convertit la réponse json en object javascript
             const data = await res.json();
             console.log('data ',data);
-            console.log('res ', res.status);
+            console.log('res apres conversion json: ', res);
+            console.log('res.status apres conversion json: ', res.status);
             
             
             if (!res.ok) {
@@ -100,10 +105,10 @@ export default function SignupScreen() {
     <>
 
     {/* Background */}
-    <View className="bg-white h-full w-full flex-1 justify-center items-center">
+    {/* <View className="bg-white h-full w-full flex-1 justify-center items-center">
       <StatusBar style="light" />
       <Image className="w-full h-full absolute" source={require('./../assets/images/background.png')} />
-    </View>
+    </View> */}
 
     {/* Lights */}
     <View className="flex-row justify-around w-full absolute">
