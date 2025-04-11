@@ -320,6 +320,8 @@ useEffect(() => {
         console.log('🟢 Avatar uploadé avec succès :', data.fileUrl);
         previousAvatarRef.current = Avatar; // 🧠 Mise à jour du ref
         setAvatar(data.fileUrl);
+        await AsyncStorage.setItem('@avatar_cdn_url', data.fileUrl);
+
       }
     } catch (err) {
       console.error('❌ Erreur upload avatar :', err);

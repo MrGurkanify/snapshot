@@ -16,7 +16,7 @@ export default function AddButton({route , label}) {
     const router = useRouter();
 
   return ( <>
-    <View className='items-center mt-4'>
+    <View className='items-center mt-4 mb-5'>
         <TouchableOpacity
             onPress={() => router.push(`/${route}`)}
             className="w-12 h-12  rounded-full bg-blue-500 items-center justify-center mt-4"

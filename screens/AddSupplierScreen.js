@@ -156,7 +156,9 @@ import {
                         || selectedImages.length > 0;
       
         if (hasContent) {
-          saveData(currentSupplierData);
+          
+              saveData('@snapshot_supplier_cache', currentSupplierData);
+
         }
       }, [supplierName , contactName, telephone, supplierEmail, selectedImages, note]);
       
@@ -256,6 +258,13 @@ import {
                 headers: { 'Content-Type': 'multipart/form-data' },
                 body: formData,
               });
+
+              if (!res.ok) {
+                const errorText = await res.text();
+                console.warn('❌ Upload échoué (non JSON)', errorText);
+                finalImageUris.push(localUri);
+                continue; // skip au suivant
+              }
     
               const data = await res.json();
               finalImageUris.push(data.success ? data.fileUrl : localUri);
@@ -282,21 +291,22 @@ import {
               createdBy: user.userId,
             }),
           });
-          const response = await res.json();
-          console.log('✅ Réponse du backend :', response);
+          const responseJson = await res.json();
 
-    
-          alert('✅ Fournisseur enregistré avec succès (backend)');
-          if (response.status === 201) {
-            console.log('✅ Fournisseur créé :', response);
+          console.log('✅ Réponse du backend :', responseJson);
+          console.log('📥 HTTP Status:', res.status);
+
+          if (res.status === 201) {
+            console.log('✅ Fournisseur créé :', responseJson);
             alert('✅ Fournisseur enregistré avec succès (backend)');
-          } else if (response.status === 409) {
-            console.warn('⚠️ Doublon détecté :', response.message);
+          } else if (res.status === 409) {
+            console.warn('⚠️ Doublon détecté :', responseJson.message);
             alert('⚠️ Ce fournisseur existe déjà dans votre liste.');
           } else {
-            console.error('❌ Erreur inconnue :', response );
+            console.error('❌ Erreur inconnue :', responseJson);
             alert('❌ Une erreur est survenue lors de la création.');
-          }
+}
+
 
         }
     
@@ -308,8 +318,10 @@ import {
         setSelectedImages([]);
         setNote('');
         setIsDisabled(true);
-    
-        await removeData(); // supprime données temporaires de AsyncStorage
+
+    // supprime données temporaires de AsyncStorage
+        await removeData('@snapshot_supplier_cache'); // ✅
+ 
     
       } catch (error) {
         console.error('❌ Erreur création supplier :', error);
@@ -459,6 +471,7 @@ import {
               autoCorrect={false}
             />
             <NoteArea
+              label="Note"
               value={note}
               onChangeText={setNote}
               // color={'#dcfce7'}

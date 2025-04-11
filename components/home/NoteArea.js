@@ -10,10 +10,10 @@
 import { View, Text , TextInput  } from 'react-native'
 
 
-export default function NoteArea( { value , onChangeText , color , autoCapitalize= 'sentences' , placeholder}) {
+export default function NoteArea( { label, value , onChangeText , color , autoCapitalize= 'sentences' , placeholder}) {
   return ( <>
     
-      <Text className="text-xl mb-2 text-gray-500">Note: </Text>
+      <Text className="text-lg mb-2 text-gray-500">{label}</Text>
       <TextInput
         multiline
         numberOfLines={5} // ou plus selon la hauteur que tu veux

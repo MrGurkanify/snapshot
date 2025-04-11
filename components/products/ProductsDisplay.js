@@ -6,37 +6,42 @@
  * ✍️  Description : Description rapide du fichier
  */
 
-
 import { useEffect, useState } from 'react';
-import { View, FlatList, ActivityIndicator, Text } from 'react-native';
-import * as SecureStore from 'expo-secure-store';
+import { View, FlatList, ActivityIndicator, Text, TouchableOpacity } from 'react-native';
+import { useRouter } from 'expo-router';
 
-// custom imports
 import ProductCard from './ProductCard';
 import { API_BASE_URL } from '../../lib/api';
+import { userSession } from '../../lib/userSession';
 
 export default function ProductsDisplay({ supplierId }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
-    console.log('🔍 supplierId:', supplierId);
     const fetchProducts = async () => {
+      const session = await userSession();
+      if (!session.valid) {
+        console.warn('❌ Pas de session valide');
+        setLoading(false);
+        return;
+      }
+
       try {
-        const token = await SecureStore.getItemAsync('userToken');
-        const res = await fetch(`${API_BASE_URL}/api/products/count?supplierId=${supplierId}` , {
-                          headers: {
-                            Authorization: `Bearer ${token}`,
-                          }
-                        });
+        const res = await fetch(`${API_BASE_URL}/api/products?supplierId=${supplierId}`, {
+          headers: {
+            Authorization: `Bearer ${session.token}`,
+          }
+        });
 
         if (!res.ok) {
-            const errorText = await res.text();
-            console.warn('⚠️ Backend a renvoyé une erreur :', res.status, errorText);
-            return;
-          }
+          const errorText = await res.text();
+          console.warn('⚠️ Backend a renvoyé une erreur :', res.status, errorText);
+          return;
+        }
+
         const data = await res.json();
-        console.log('📦 Données produits reçues :', data);
         setProducts(data.products);
       } catch (err) {
         console.error('Erreur chargement produits :', err);
@@ -55,7 +60,7 @@ export default function ProductsDisplay({ supplierId }) {
       </View>
     );
   }
-// c'est la view fallback si on n'a pas de produits pour le supplier 
+
   if (!Array.isArray(products) || products.length === 0) {
     return (
       <View className="flex-1 items-center justify-center ">
@@ -68,7 +73,9 @@ export default function ProductsDisplay({ supplierId }) {
     <FlatList
       data={products}
       keyExtractor={(item) => item._id}
-      renderItem={({ item }) => <ProductCard product={item} />}
+      renderItem={({ item }) => (
+        <ProductCard product={item} />
+      )}
       contentContainerStyle={{ paddingBottom: 100 }}
       className="px-4"
     />

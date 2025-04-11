@@ -110,10 +110,9 @@ export default function HomeScreen() {
       // on appelle fetchCounts ici 
       
       
-      console.log('\n\n\n');
-      console.log('user : ',user);
-      console.log('\n\n\n');
-      console.log('decode: ',decode);
+console.log(' ***** 🔍 HomeScreen.js ***** → user: ', user);
+console.log(' ***** 🔍 HomeScreen.js ***** → decode: ', decode);
+
       
       setProductCount(5);
       setSupplierCount(10);
@@ -152,39 +151,54 @@ export default function HomeScreen() {
   }, [user]); // 🔁 dès que `user` est défini
 
 
-  // useEffect avec un timer pour vérifier la connexion
-  useEffect(() => {
-    const checkConnection = async () => {
+  
+ // useEffect avec un timer pour vérifier la connexion
+useEffect(() => {
+  const checkConnection = async () => {
+    try {
+      const network = await Network.getNetworkStateAsync();
+      const connected = network.isConnected && network.isInternetReachable;
+
+      console.log('🔁 Ping vers :');
+
+      let isBackendOnline = false;
+      let isCdnOnline = false;
+
       try {
-        const network = await Network.getNetworkStateAsync();
-        const connected = network.isConnected && network.isInternetReachable;
-        console.log('🔁 Ping vers :');
-        const backendPing = await fetch(`${API_BASE_URL}/api/ping`);
+        const backendPing = await fetch(`${API_BASE_URL}/api/ping`, { method: 'GET' });
+        isBackendOnline = backendPing.ok;
         console.log('Backend →', `${API_BASE_URL}/api/ping`);
-
-        const cdnPing = await fetch(`${API_CDN_URL}/ping`);
-        console.log('CDN →', `${API_CDN_URL}/ping`);
-
-        const isBackendOnline = backendPing.ok;
-        const isCdnOnline = cdnPing.ok;
-  
-        if (connected && isBackendOnline && isCdnOnline) {
-          setIsOnline(true);
-          console.log('🟢 Tous les services sont en ligne');
-        } else {
-          setIsOnline(false);
-          console.warn('⚠️ Un ou plusieurs services sont inaccessibles');
-        }
-      } catch {
-        setIsOnline(false);
+      } catch (err) {
+        console.warn('❌ Backend ping failed');
       }
-    };
-  
-    checkConnection();
-  
-    const interval = setInterval(checkConnection, 10000); // check toutes les 10s
-    return () => clearInterval(interval);
-  }, []);
+
+      try {
+        const cdnPing = await fetch(`${API_CDN_URL}/ping`, { method: 'GET' });
+        isCdnOnline = cdnPing.ok;
+        console.log('CDN →', `${API_CDN_URL}/ping`);
+      } catch (err) {
+        console.warn('❌ CDN ping failed');
+      }
+
+      if (connected && isBackendOnline && isCdnOnline) {
+        setIsOnline(true);
+        console.log('🟢 Tous les services sont en ligne');
+      } else {
+        setIsOnline(false);
+        console.warn('⚠️ Un ou plusieurs services sont inaccessibles');
+      }
+    } catch (err) {
+      console.warn('❌ Erreur globale dans checkConnection', err);
+      setIsOnline(false);
+    }
+  };
+
+  checkConnection();
+
+  const interval = setInterval(checkConnection, 10000); // check toutes les 10s
+  return () => clearInterval(interval);
+}, []);
+
 
   /* Dès que le isOnline passe à true 
   (donc connexion réseau + ping backend + ping CDN OK),
