@@ -1,27 +1,25 @@
-/**
- * 📁 File : ImageViewer.js
- * 🛤️  Path  : ~/developpement /snapshot/components/home/ImageViewer.js
- * 📅 Updated at : 2025-04-10
- * 👤 Author  : William Balikel
- * ✍️  Description : Affiche un carousel d’images avec navigation et icône de suppression.
- */
-
 import React, { useRef, useState } from 'react';
-import { View, FlatList, Image, TouchableOpacity, Text, Dimensions } from 'react-native';
-import { ChevronLeftIcon, ChevronRightIcon, TrashIcon } from 'react-native-heroicons/solid';
+import { View, FlatList, Image, TouchableOpacity, Text, Dimensions, Modal } from 'react-native';
+import { ChevronLeftIcon, ChevronRightIcon, TrashIcon, XMarkIcon } from 'react-native-heroicons/solid';
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 const IMAGE_WIDTH = width;
 
 export default function ImageViewer({ images = [], onTrashPress }) {
   const flatListRef = useRef(null);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [modalVisible, setModalVisible] = useState(false);
 
   const scrollToIndex = (index) => {
     if (index >= 0 && index < images.length) {
       flatListRef.current.scrollToIndex({ index, animated: true });
       setCurrentIndex(index);
     }
+  };
+
+  const openModal = (index) => {
+    setCurrentIndex(index);
+    setModalVisible(true);
   };
 
   return (
@@ -45,6 +43,7 @@ export default function ImageViewer({ images = [], onTrashPress }) {
         </>
       )}
 
+      {/* Image slider */}
       <FlatList
         data={images}
         ref={flatListRef}
@@ -57,8 +56,12 @@ export default function ImageViewer({ images = [], onTrashPress }) {
           const index = Math.round(event.nativeEvent.contentOffset.x / width);
           setCurrentIndex(index);
         }}
-        renderItem={({ item }) => (
-          <View style={{ width, alignItems: 'center' }}>
+        renderItem={({ item, index }) => (
+          <TouchableOpacity
+            onPress={() => openModal(index)}
+            activeOpacity={0.9}
+            style={{ width, alignItems: 'center' }}
+          >
             <Image
               source={{ uri: item }}
               style={{
@@ -68,23 +71,76 @@ export default function ImageViewer({ images = [], onTrashPress }) {
                 resizeMode: 'cover',
               }}
             />
-
             {/* Trash icon (si onTrashPress est fourni) */}
             {onTrashPress && (
               <TouchableOpacity
                 onPress={() => onTrashPress(currentIndex)}
                 className="absolute top-3 right-8 bg-white/80 p-2 rounded-full"
               >
-                <TrashIcon size={22} color="#EF4444" />
+                <TrashIcon size={32} color="#EF4444" />
               </TouchableOpacity>
             )}
-          </View>
+          </TouchableOpacity>
         )}
       />
 
+      {/* Indicator */}
       <Text className="text-sm text-gray-400 mt-2">
         {currentIndex + 1} / {images.length}
       </Text>
+
+      {/* Modal plein écran */}
+      <Modal visible={modalVisible} transparent={true}>
+  <View className="flex-1 bg-black justify-center items-center ">
+    <TouchableOpacity
+      className="absolute top-12 mt-20 right-12 z-20 border-2 border-white rounded-full p-1"
+      onPress={() => setModalVisible(false)}
+    >
+      <XMarkIcon size={30} color="white" />
+    </TouchableOpacity>
+
+    <FlatList
+      data={images}
+      keyExtractor={(item, index) => index.toString()}
+      horizontal
+      pagingEnabled
+      showsHorizontalScrollIndicator={false}
+      initialScrollIndex={currentIndex}
+      getItemLayout={(data, index) => ({
+        length: width,
+        offset: width * index,
+        index,
+      })}
+      onMomentumScrollEnd={(event) => {
+        const index = Math.round(event.nativeEvent.contentOffset.x / width);
+        setCurrentIndex(index);
+      }}
+      renderItem={({ item }) => (
+        <View
+          style={{
+            width: width,
+            height: height,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <Image
+            source={{ uri: item }}
+            style={{
+              width: width,
+              height: height,
+              resizeMode: 'cover',
+              marginTop: 40,
+              marginBottom: 20,
+              borderRadius: 15,
+            }}
+          />
+        </View>
+      )}
+    />
+  </View>
+</Modal>
+
     </View>
   );
 }

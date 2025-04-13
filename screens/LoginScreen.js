@@ -14,13 +14,17 @@ import { useRouter, useFocusEffect } from 'expo-router';
 
 
 
+
 // Custom Components import
 import Logo from './../ui/Logo';
 import FormInput from './../components/FormInput';
 import FormButton from './../components/FormButton';
 import TextButtonLink from '../components/TextButtonLink';
 import FormFrame from './../components/FormFrame';
+
 import { API_BASE_URL } from '../lib/api';
+import { isAppOnline } from '../lib/network';
+import { userSession } from '../lib/userSession';
 
 // la class absolute permet de mettre l'image en background arrière plan derrière les autres composants 
 
@@ -73,66 +77,56 @@ useFocusEffect(
 
 
 
-    const handleLogin = async () => {
-        // si le formulaire n'est pas valide, on return on sort de handleLogin
-        if (!isFormValid) {
-            return;
-        }
-        
-        console.log('login button clicked');
-        console.log('connexion en cours ...');
-        setIsLoading(true);
+const handleLogin = async () => {
+  if (!isFormValid) return;
 
-        try {
-            const res = await fetch(`${API_BASE_URL}/api/login`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              // l'argument de .stringify() doit être un objet javascript , on le stringify pour le convertir en JSON texte
-              body: JSON.stringify({ email, password }),
-            });
-            // le .json() convertit un JSON string reçu du backend en un objet javascript
-            // ensuite on pourra faire data.x ou data.y pour accéder aux valeurs de l'objet 
-            const data = await res.json();
-            
-            // c'est une vérif la plus importante 
-            // car si pas de réponse ok du backend ca veut dire que le login a échoué
-            // ou que le serveur est offline 
-            // ou que le user n'existe pas
-            // si ce if ne trigger pas, c'est que le login est successfull
-            if (!res.ok) {
-              console.log(res);
-              console.warn('❌ Login failed:', data.message);
-              return;
-            }
-        
-            console.log('✅ Login successful');
-            console.log('✅ la data:', data);
-            console.log('Le Token obtenu du backend: ', data.token);
-            
-            // si le login est successfull on a obtenu un token du backend
-            // Sauvegarder le token dans SecureStore
-            await SecureStore.setItemAsync('userToken', data.token);
-            // Supprimer les données auto-login après utilisation
-            // je veux conserver les données auto-login pour la prochaine connexion
-            // même si je fais un logout
+  console.log('login button clicked');
+  console.log('connexion en cours ...');
+  setIsLoading(true);
 
-          //await SecureStore.deleteItemAsync('autoLoginEmail');
-          //await SecureStore.deleteItemAsync('autoLoginPassword');
+  try {
+    const online = await isAppOnline();
 
-            // comme on est dans un path flow successfull on peut se diriger dans la home page avec un token en poche
-            // Tu peux maintenant router vers une page "Home" ou dashboard
-          router.push('/home');
+    if (!online) {
+      console.warn('📴 Mode offline détecté — on vérifie la présence d’un token');
+      const session = await userSession();
 
-          } catch (error) {
-            console.error('Erreur réseau :', error);
-            // finally toujours exécuté que le try soit successfull ou pas même avec un return
-          } finally {
-            setIsLoading(false);
-          }
-
+      if (session.valid) {
+        console.log('✅ Token valide en local — accès autorisé (offline)');
+        router.push('/home');
+        return;
+      } else {
+        console.warn('❌ Aucun token valide — login impossible offline');
+        return;
+      }
     }
+
+    // En ligne → Login classique
+    const res = await fetch(`${API_BASE_URL}/api/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      console.warn('❌ Login échoué :', data.message);
+      return;
+    }
+
+    await SecureStore.setItemAsync('userToken', data.token);
+    console.log('✅ Login en ligne réussi — token sauvegardé');
+    router.push('/home');
+
+  } catch (error) {
+    console.error('Erreur réseau :', error);
+  } finally {
+    setIsLoading(false);
+  }
+};
     
     return (
       <>

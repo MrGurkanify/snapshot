@@ -16,7 +16,7 @@
 
 
 
-import { View, Text , Image } from 'react-native';
+import { View, Text , AppState} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useState, useEffect } from 'react';
@@ -27,6 +27,7 @@ import { useRouter } from 'expo-router';
 import { syncUnsyncedData } from '../lib/offline'; 
 import { decodeJWT } from '../lib/decodeJWT';
 import { API_BASE_URL, API_CDN_URL } from '../lib/api';
+import { isAppOnline } from '../lib/network'; 
 
 
 import HeaderBar from '../components/home/HeaderBar';
@@ -51,6 +52,8 @@ export default function HomeScreen() {
   const router = useRouter();
   console.log('👤 user dans HomeScreen :', user);
 
+  console.log(' ***** 🔍 HomeScreen.js ***** → AppState: ', AppState.currentState === 'active');
+  console.log(' ***** 🔍 HomeScreen.js ***** → AppState: ', AppState.current);
  
 
   useEffect(() => {
@@ -81,22 +84,27 @@ export default function HomeScreen() {
 // on peut avoir un token residuel alors qu'un user n'existe pas dans la BDD
 // on fait une requête vers le backend pour vérifier si l'utilisateur existe
 // si c'est le cas , on interroge le backend       
-      try {
-        const res = await fetch(`${API_BASE_URL}/api/verify-user/${decode.userId}`);
-        if (!res.ok) {
-          console.log('Utilisateur non trouvé dans la BDD');
-          await SecureStore.deleteItemAsync('userToken');
-          setUser(null);
-          router.replace('/login');
-          return;
-        }
-      } catch (err) {
-        console.error('Erreur réseau lors de la vérification utilisateur :', err);
-        await SecureStore.deleteItemAsync('userToken');
-        setUser(null);
-        router.replace('/login');
-        return;
-      }
+const online = await isAppOnline();
+if (online) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/verify-user/${decode.userId}`);
+    if (!res.ok) {
+      console.warn('⚠️ User introuvable côté backend (en ligne)');
+      await SecureStore.deleteItemAsync('userToken');
+      setUser(null);
+      router.replace('/login');
+      return;
+    }
+  } catch (err) {
+    console.warn('🌐 Erreur réseau en ligne → on passe offline', err);
+    await SecureStore.deleteItemAsync('userToken');
+    setUser(null);
+    router.replace('/login');
+    return;
+  }
+} else {
+  console.warn('📴 Backend offline → on reste en mode offline avec token local');
+}
 // après les if's validation & verif à partir de là, tout est ok
 // on set la var state user avec l'objet     
 
@@ -195,7 +203,7 @@ useEffect(() => {
 
   checkConnection();
 
-  const interval = setInterval(checkConnection, 10000); // check toutes les 10s
+  const interval = setInterval(checkConnection, 15000); // check toutes les 20s
   return () => clearInterval(interval);
 }, []);
 

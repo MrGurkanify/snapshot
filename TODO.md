@@ -12,6 +12,7 @@ route du backend qui imposent les limitations à ce user
 0. on load le profil par défault à l'arrivée sur la homescreen (photo avatar)
 via un useEffect il load via le hard du smartphone via async ou bien expo filesystem
 
+le forgot password a faire
 
 
 1. ajout automatique d'un avatar fallback astronaute dès que le user est create un avatar par défaut lui est attribué jusqu'à qu'il change dans le profil.
@@ -57,9 +58,9 @@ le middleware coté next.js pour checker le crédentials comme l'app cosmo si le
 
 14. mettre en place un bearer pour le crud des suppliers et products je veux pas qu'on spouf le bdd 
 
-15. il faut un client feeback button à la marc lou pour récupérer les feedbacks des clients
+15. il faut un client feeback button à la marc lou pour récupérer les feedbacks des clients || le forgot password à faire fait gaffe à resend
 
-16. le cdn devra avoir des repertoire au nom du user qui upload dans le repertoire images , il faut verifier le token avant d'uploader dans le cdn .
+16. le cdn devra avoir des repertoire au nom du user qui upload dans le repertoire images , il faut verifier le token avant d'uploader dans le cdn .Il peut uploader si le session.token === valid
 
 17. il faut anticiper l'état premier de l'app quand au départ il n'y a pas de supplier 
  Affichage conditionnel s’il n’y a aucun fournisseur ("Aucun fournisseur trouvé")
@@ -69,6 +70,7 @@ le middleware coté next.js pour checker le crédentials comme l'app cosmo si le
 
  19. le cdn comme c'est un placeholder de stockage , il doit être structuré de la façon suivante :
  /projectName_AppName_Repo/user_repo/fileXYZ
+ /snapshot/william/
 
  20. tester le sync en mode offline
 
@@ -76,7 +78,9 @@ le middleware coté next.js pour checker le crédentials comme l'app cosmo si le
  21. pour les test de l'app avant la prod 
         + vérifier avec 2 usersdifférent logués un dans le simulateur et l'autre sur l'iphone 16 pro . Créer le meme supplier pour chacun .
         + teste l'app offline , je recherche des bugs et erreurs .
+        + Reset du cdn 
 
+22. pour les test chasse au bug , le token est placé à 30min , en prod faut le mettre à 45 jours
 
     {/* l'astuce est de wrapper le light dans une nouvelle <View> nous sert de  wrapper  , un peu comme les layers des soft de design  */ }
     {/* <View> c'est une manière de dire que je veux un nouveau layer */ }
@@ -113,5 +117,10 @@ eas build --profile development --platform android
 
 
 
+##################@
 
+comportement de snapshot :
+
+quand il est offline , et que le user n'a pas de token alors le user ne peut pas se connecter , il ne peut pas se loger .
+Ce comportement arrive parceque le token est à 30 min , au moindre porblème avec le token snapshot ramène vers la loginscreen.
 

@@ -46,8 +46,8 @@ export default function AddPhotoButton({ onImageSelected, currentCount = 0 }) {
     }
 
     const result = await ImagePicker.launchCameraAsync({
-      allowsEditing: true,
-      aspect: [4, 3],
+      allowsEditing: false,
+      aspect: [3, 4],
       quality: 1,
     });
 

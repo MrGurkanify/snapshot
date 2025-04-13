@@ -1,9 +1,17 @@
-import { View, Text } from 'react-native';
+/**
+ * 📁 File : ProductsScreen.js
+ * 🛤️  Path  : ~/developpement /snapshot/app/(tabs)/ProductsScreen.js
+ * 📅 Created at : 2025-04-11
+ * 👤 Author  : William Balikel
+ * ✍️  Description : Description rapide du fichier
+ */
 
-export default function Products() {
-  return (
-    <View className="flex-1 justify-center items-center">
-      <Text>Products Page</Text>
-    </View>
-  );
+
+import ProductsScreen from '../../screens/ProductsScreen';
+
+
+
+export default function Home() {
+  return <ProductsScreen />;
 }
+

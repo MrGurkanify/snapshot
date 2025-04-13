@@ -16,12 +16,12 @@ export default function NoteArea( { label, value , onChangeText , color , autoCa
       <Text className="text-lg mb-2 text-gray-500">{label}</Text>
       <TextInput
         multiline
-        numberOfLines={5} // ou plus selon la hauteur que tu veux
+        numberOfLines={6} // ou plus selon la hauteur que tu veux
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
         className="bg-black/5 h-32 py-3 px-3 rounded-2xl w-full mb-3 border outline-none border-gray-300 text-xl"
-        maxLength={120}
+        maxLength={220}
         // style={{ backgroundColor: color }} 
         autoCapitalize={ autoCapitalize } // Capitalisation automatique
         autoComplete="off"

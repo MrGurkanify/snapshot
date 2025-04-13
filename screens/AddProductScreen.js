@@ -38,6 +38,7 @@ export default function AddProductScreen() {
   const router = useRouter();
   const { supplierId } = useLocalSearchParams();
 
+  const [supplierName, setSupplierName] = useState('');
   const [productName, setProductName] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
@@ -67,6 +68,8 @@ export default function AddProductScreen() {
     loadSession();
   }, []);
 
+
+
   useEffect(() => {
     if (productName.trim().length === 0) {
       setIsDisabled(true);
@@ -74,6 +77,8 @@ export default function AddProductScreen() {
       setIsDisabled(false);
     }
   }, [productName]);
+
+
 
   useEffect(() => {
     const loadCached = async () => {
@@ -88,11 +93,42 @@ export default function AddProductScreen() {
     loadCached();
   }, []);
 
+
+
+
   useEffect(() => {
     const currentData = { productName, description, price, selectedImages };
     saveData( cacheKey , currentData);
     
   }, [productName, description, price, selectedImages]);
+
+
+  useEffect(() => {
+    const fetchSupplierName = async () => {
+      try {
+        if (!supplierId || !user?.token) return;
+  
+        const res = await fetch(`${API_BASE_URL}/api/suppliers/${supplierId}`, {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        });
+  
+        if (res.ok) {
+          const data = await res.json();
+          setSupplierName(data.supplierName);
+        } else {
+          console.warn('❌ Impossible de récupérer le nom du fournisseur');
+        }
+      } catch (err) {
+        console.error('❌ Erreur fetch supplierName :', err);
+      }
+    };
+  
+    fetchSupplierName();
+  }, [supplierId, user]);
+
+
 
   const handleImageSelect = (uri) => {
     if (selectedImages.length >= 3) {
@@ -105,6 +141,9 @@ export default function AddProductScreen() {
     }
     setSelectedImages(prev => [...prev, uri]);
   };
+
+
+
 
   const handleRemoveImage = (index) => {
     setImageIndexToDelete(index);
@@ -212,14 +251,14 @@ export default function AddProductScreen() {
         <Modal visible={isModalVisible} transparent animationType="fade">
           <BlurView intensity={50} tint="dark" className="flex-1 justify-center items-center px-4">
             <View className="bg-white rounded-2xl p-6 w-full max-w-md">
-              <Text className="text-lg font-semibold text-gray-800 mb-4">Supprimer l'image ?</Text>
-              <Text className="text-gray-600 mb-6">Voulez-vous vraiment supprimer cette image ?</Text>
+              <Text className="text-lg font-semibold text-gray-800 mb-4">Delete the image ?</Text>
+              <Text className="text-gray-600 mb-6">Do you want to delete this image ?</Text>
               <View className="flex-row justify-end space-x-4 gap-10">
                 <Pressable onPress={() => setIsModalVisible(false)} className="px-4 py-2 rounded-md bg-green-200">
-                  <Text className="text-green-800">Annuler</Text>
+                  <Text className="text-green-800">Cancel</Text>
                 </Pressable>
                 <Pressable onPress={confirmRemoveImage} className="px-4 py-2 rounded-md bg-red-500">
-                  <Text className="text-white">Supprimer</Text>
+                  <Text className="text-white">Delete</Text>
                 </Pressable>
               </View>
             </View>
@@ -228,7 +267,7 @@ export default function AddProductScreen() {
 
         <View className="flex-row items-center mt-10 mb-5 gap-12">
           <LeftArrow />
-          <Text className="text-lg font-semibold text-gray-400">Add new product</Text>
+          <Text className="text-lg font-semibold text-gray-400">Add new product for {supplierName}</Text>
         </View>
 
         <LabelForm>

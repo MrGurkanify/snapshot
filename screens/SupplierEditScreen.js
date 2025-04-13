@@ -223,14 +223,14 @@ export default function SupplierEditScreen() {
         <Modal visible={isModalVisible} transparent animationType="fade">
           <BlurView intensity={50} tint="dark" className="flex-1 justify-center items-center px-4">
             <View className="bg-white rounded-2xl p-6 w-full max-w-md">
-              <Text className="text-lg font-semibold text-gray-800 mb-4">Supprimer l'image ?</Text>
-              <Text className="text-gray-600 mb-6">Voulez-vous vraiment supprimer cette image ?</Text>
+              <Text className="text-lg font-semibold text-gray-800 mb-4">Delete this image</Text>
+              <Text className="text-gray-600 mb-6">Do you want to delete this image?</Text>
               <View className="flex-row justify-end space-x-4 gap-10">
                 <Pressable onPress={() => setIsModalVisible(false)} className="px-4 py-2 rounded-md bg-green-200">
-                  <Text className="text-green-800">Annuler</Text>
+                  <Text className="text-green-800">Cancel</Text>
                 </Pressable>
                 <Pressable onPress={confirmRemoveImage} className="px-4 py-2 rounded-md bg-red-500">
-                  <Text className="text-white">Supprimer</Text>
+                  <Text className="text-white">Delete</Text>
                 </Pressable>
               </View>
             </View>
@@ -280,7 +280,7 @@ export default function SupplierEditScreen() {
         <Modal visible={deleteModalVisible} transparent animationType="fade">
           <BlurView intensity={50} tint="dark" className="flex-1 justify-center items-center px-4">
             <View className="bg-white rounded-2xl p-6 w-full max-w-md">
-              <Text className="text-lg font-semibold text-gray-800 mb-4">Delete this supplier ?</Text>
+              <Text className="text-lg font-semibold text-gray-800 mb-4">Delete this supplier</Text>
               <Text className="text-gray-600 mb-6">
               This action is irreversible. All related data and images will be deleted. 
               </Text>

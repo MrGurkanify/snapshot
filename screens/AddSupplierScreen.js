@@ -81,7 +81,7 @@ import {
       console.log('\n------@@@@@xxxxx démarrage du useffect de session  xxxxx@@@@@@------\n');
 
       const checkSession = async () => { 
-          
+          // userSession nous donne le token , et le token décodé , et un flag valid 
           const session = await userSession();
           
           if(!session.valid) {
@@ -92,7 +92,7 @@ import {
 
           // si on a une session valide , on chope le token et le token decode
           const { token , decoded } = session;
-
+// on passe à la state var user , un object js buildé avec le token et le decoded
           setUser({
             token,
             userId: decoded.userId,
@@ -111,11 +111,13 @@ import {
       }
       
       checkSession();
-
+// ce useEffect s'éxécute une fois à la première mount du composant 
+// il ne s'éxecutera pas à chaque fois que le composant est re-rendu
     }, []);
 
     // on place un useEffect pour vérifier si on a une session utilisateur
-
+    // ce useEffect est un indicateur de session qui est adossé au dépendance user
+    // il s'éxecute à chaque fois que user change
     useEffect(() => {
       console.log('\n------@@@@@xxxxx démarrage du useffect de user presence  xxxxx@@@@@@------\n');
       if (user) {
@@ -126,10 +128,11 @@ import {
     
     
  // Save data to AsyncStorage dès que le composant est monté
- // ce use effect est configuré pour s'éxecuter  , contactName, telephone, supplierEmail, selectedImages, note
-      // il sert sauvegarder supplierData même parteillement 
+ // ce use effect est configuré pour s'éxecuter si les dépendances suivantes changent 
+ // contactName, telephone, supplierEmail, selectedImages, note
+      // il sert à sauvegarder supplierData même parteillement 
       // à chaque fois que l'un de ces champs change
-      // il sauvegarde les données dans le local storage
+      // il sauvegarde les données dans le local asyncstorage
       // Dès que le champ supplierName contient un texte non vide (même seul),
       // les valeurs actuelles de tous les champs sont sauvegardées.
       // Tu continues à surveiller tous les champs ([] de dépendances), 
@@ -148,20 +151,26 @@ import {
         };
       
         // Si au moins un champ est rempli OU des images sont sélectionnées, on sauvegarde
+        // c'est une façon de demandé si un champ a une présence , a une valeur
         const hasContent = supplierName?.trim().length > 0 
                         || contactName?.trim().length > 0
                         || telephone?.trim().length > 0
                         || supplierEmail?.trim().length > 0
                         || note?.trim().length > 0
                         || selectedImages.length > 0;
-      
+      // hasContent est true si au moins un des champs a une valeur
         if (hasContent) {
           
               saveData('@snapshot_supplier_cache', currentSupplierData);
 
-        }
+        } // ce useEffect s'éxecute à chaque fois que l'un des champs ci dessous change
       }, [supplierName , contactName, telephone, supplierEmail, selectedImages, note]);
       
+
+
+
+
+
 
     // au mount du composant on load les données
     // et on load et met dans le state
@@ -170,9 +179,11 @@ import {
       
       const loadingData = async () => { 
 
-        const data = await loadData();
+        const data = await loadData('@snapshot_supplier_cache');
         console.log('\nmes data dans le useEffect et récupéré du asyncstorage \n ',data);
         if (data) {
+          // si on a des données dans le cache 
+          // on les met dans le state correspondant aux inputs des champs du formulaire
             setSupplierName(data.supplierName);
             setContactName(data.contactName);
             setTelephone(data.telephone);
@@ -196,29 +207,37 @@ import {
     
     const handleSubmitCreateSupplier = async () => {
 
-      if (submitted) return; // 🔒 Bloque les clics répétés
-      
+      if (submitted) return; // 🔒 Bloque les clics répétés , pas d'appuie 2 fois accidentel
+      // balise de marqueur pour  piéger le runtime au re-render du composant
       setSubmitted(true);
 
       try {
+        // on rend obligatoire le champ supplierName pour submit le formulaire
+        // si le champ supplierName est vide , on affiche une alerte
+        // et on ne soumet pas le formulaire
         if (!supplierName.trim()) {
           return alert('Please enter a supplier name');
         }
-    
+    // à droite c'est les state vars réaffectées dans de nouvelles vars
         const trimmedSupplierName = supplierName.trim();
         const trimmedTelephone = telephone.trim();
         const trimmedSupplierEmail = supplierEmail.trim();
-    
+
+    // on active le spinner visuel
         setIsLoading(true);
-        // notre array d'images finales
+        // notre array d'images finales déclaré 
         const finalImageUris = [];
     
-        // 🧠 Étape 1 : vérifie si le réseau est dispo
+        // 🧠 Étape 1 : vérifie si le réseau est dispo , c'est la mesure far de l'app
         const networkState = await Network.getNetworkStateAsync();
         const isConnected = networkState.isConnected && networkState.isInternetReachable;
-    
+        console.log(' ***** 🔍 AddSupplierScreen.js ***** appuie sur button crearte et état du réseaux → isConnected: ', isConnected);
+        
+
         if (!isConnected) {
           // 🔴 MODE OFFLINE : on sauvegarde tout localement
+          console.log(' ***** 🔍 AddSupplierScreen.js ***** → passage en mode offline: ', isConnected);
+          
           await saveSupplierDataOffline({
             supplierName: trimmedSupplierName,
             contactName,
@@ -310,7 +329,7 @@ import {
 
         }
     
-        // 🧹 Reset
+        // 🧹 Reset des champs
         setSupplierName('');
         setContactName('');
         setTelephone('');
@@ -319,7 +338,7 @@ import {
         setNote('');
         setIsDisabled(true);
 
-    // supprime données temporaires de AsyncStorage
+    // supprime données temporaires de AsyncStorage init du cache 
         await removeData('@snapshot_supplier_cache'); // ✅
  
     
