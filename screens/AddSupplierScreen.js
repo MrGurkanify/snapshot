@@ -211,7 +211,7 @@ import {
       if (submitted) return; // 🔒 Bloque les clics répétés , pas d'appuie 2 fois accidentel
       // balise de marqueur pour  piéger le runtime au re-render du composant
       setSubmitted(true);
-
+    
       try {
         // on rend obligatoire le champ supplierName pour submit le formulaire
         // si le champ supplierName est vide , on affiche une alerte
@@ -219,12 +219,13 @@ import {
         if (!supplierName.trim()) {
           return alert('Please enter a supplier name');
         }
-    // à droite c'est les state vars réaffectées dans de nouvelles vars
+    
+        // à droite c'est les state vars réaffectées dans de nouvelles vars
         const trimmedSupplierName = supplierName.trim();
         const trimmedTelephone = telephone.trim();
         const trimmedSupplierEmail = supplierEmail.trim();
-
-    // on active le spinner visuel
+    
+        // on active le spinner visuel
         setIsLoading(true);
         // notre array d'images finales déclaré 
         const finalImageUris = [];
@@ -233,8 +234,7 @@ import {
         const networkState = await Network.getNetworkStateAsync();
         const isConnected = networkState.isConnected && networkState.isInternetReachable;
         console.log(' ***** 🔍 AddSupplierScreen.js ***** appuie sur button crearte et état du réseaux → isConnected: ', isConnected);
-        
-
+    
         if (!isConnected) {
           // 🔴 MODE OFFLINE : on sauvegarde tout localement
           console.log(' ***** 🔍 AddSupplierScreen.js ***** → passage en mode offline: ', isConnected);
@@ -254,19 +254,41 @@ import {
     
           alert('📴 Pas de connexion : le fournisseur a été sauvegardé localement.');
         } else {
-          // 🟢 MODE ONLINE : envoi images + data au backend 
+          // 🟢 MODE ONLINE : envoi data → puis upload images → puis patch
+          const createRes = await fetch(`${API_BASE_URL}/api/suppliers`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${user.token}`,
+            },
+            body: JSON.stringify({
+              supplierName: trimmedSupplierName,
+              contactName,
+              telephone: trimmedTelephone,
+              supplierEmail: trimmedSupplierEmail,
+              selectedImages: [], // ← images ajoutées après
+              note,
+              createdBy: user.userId,
+            }),
+          });
     
+          const created = await createRes.json();
+          const supplierId = created?.supplier?._id;
+    
+          console.log('✅ Supplier créé (ID) :', supplierId);
+    
+          if (!supplierId) {
+            throw new Error("Aucun supplierId reçu après création");
+          }
+    
+          // ensuite on fait l'upload des images avec userId + supplierId
           for (const localUri of selectedImages) {
             try {
               const formData = new FormData();
-              const uniqueName = `${Date.now()}-${user.userId}.jpg`;
-
-              // on récupère l'userId de la session
-              
-              const userId = user?.userId;
-              
-              formData.append('userId', userId); // 🔥 indispensable maintenant
+              const uniqueName = `${Date.now()}-${supplierId}.jpg`;
     
+              formData.append('userId', user.userId); // 🔥 indispensable maintenant
+              formData.append('supplierId', supplierId); // nouveau champ requis
               formData.append('image', {
                 uri: localUri,
                 name: uniqueName,
@@ -278,7 +300,7 @@ import {
                 headers: { 'Content-Type': 'multipart/form-data' },
                 body: formData,
               });
-
+    
               if (!res.ok) {
                 const errorText = await res.text();
                 console.warn('❌ Upload échoué (non JSON)', errorText);
@@ -294,40 +316,20 @@ import {
             }
           }
     
-          // Envoi vers backend
-          const res = await fetch(`${API_BASE_URL}/api/suppliers`, {
-            method: 'POST',
+          // PATCH du supplier pour lui ajouter les images
+          const patchRes = await fetch(`${API_BASE_URL}/api/suppliers/${supplierId}`, {
+            method: 'PATCH',
             headers: {
               'Content-Type': 'application/json',
               Authorization: `Bearer ${user.token}`,
             },
-            body: JSON.stringify({
-              supplierName: trimmedSupplierName,
-              contactName,
-              telephone: trimmedTelephone,
-              supplierEmail: trimmedSupplierEmail,
-              selectedImages: finalImageUris,
-              note,
-              createdBy: user.userId,
-            }),
+            body: JSON.stringify({ selectedImages: finalImageUris }),
           });
-          const responseJson = await res.json();
-
-          console.log('✅ Réponse du backend :', responseJson);
-          console.log('📥 HTTP Status:', res.status);
-
-          if (res.status === 201) {
-            console.log('✅ Fournisseur créé :', responseJson);
-            alert('✅ Fournisseur enregistré avec succès (backend)');
-          } else if (res.status === 409) {
-            console.warn('⚠️ Doublon détecté :', responseJson.message);
-            alert('⚠️ Ce fournisseur existe déjà dans votre liste.');
-          } else {
-            console.error('❌ Erreur inconnue :', responseJson);
-            alert('❌ Une erreur est survenue lors de la création.');
-}
-
-
+    
+          const patchJson = await patchRes.json();
+          console.log('📎 PATCH des images :', patchJson);
+    
+          alert('✅ Fournisseur enregistré avec succès (backend + images)');
         }
     
         // 🧹 Reset des champs
@@ -338,10 +340,9 @@ import {
         setSelectedImages([]);
         setNote('');
         setIsDisabled(true);
-
-    // supprime données temporaires de AsyncStorage init du cache 
+    
+        // supprime données temporaires de AsyncStorage init du cache 
         await removeData('@snapshot_supplier_cache'); // ✅
- 
     
       } catch (error) {
         console.error('❌ Erreur création supplier :', error);
@@ -350,6 +351,7 @@ import {
         setSubmitted(false);
       }
     };
+    
      // fin de la fonction handleSubmitCreateSupplier
     
     
