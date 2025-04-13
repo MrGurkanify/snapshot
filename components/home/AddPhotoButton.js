@@ -66,9 +66,9 @@ export default function AddPhotoButton({ onImageSelected, currentCount = 0 }) {
 
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
-      allowsEditing: true,
+      allowsEditing: flase,
       allowsMultipleSelection: false,
-      aspect: [4, 3],
+      aspect: [3, 4],
       quality: 1,
     });
 
