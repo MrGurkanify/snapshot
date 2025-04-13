@@ -26,6 +26,7 @@ import TabBar from '../components/home/TabBar';
 import ProductsDisplayAll from '../components/products/ProductsDisplayAll';
 import SearchBarInput from '../components/home/SearchBarInput';
 
+
 export default function Products() {
   const [syncing, setSyncing] = useState(false);
   const [isOnline , setIsOnline ] = useState(true);
@@ -50,6 +51,7 @@ export default function Products() {
         userId: session.decoded.userId,
         email: session.decoded.email,
         username: session.decoded.userName,
+        
       });
   
       console.log('✅ User chargé dans ProductScreen');

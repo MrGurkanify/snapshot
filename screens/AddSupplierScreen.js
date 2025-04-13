@@ -38,7 +38,7 @@ import {
   import AddPhotoButton from '../components/home/AddPhotoButton';
   import AddSupplierButton from '../components/home/AddSupplierButton';
   import ImageViewer from '../components/home/ImageViewer';
-
+  import FreemiumNotice from '../ui/FreemiumNotice';
 
   import { API_BASE_URL, API_CDN_URL } from '../lib/api';
   import { saveData , loadData, removeData, clearAllData } from '../lib/dataOps';
@@ -97,7 +97,8 @@ import {
             token,
             userId: decoded.userId,
             email: decoded.email,
-            username: decoded.userName, 
+            username: decoded.userName,
+            isFullAccess: decoded.isFullAccess,
 
           });
 
@@ -106,7 +107,7 @@ import {
           console.log('\n\n\n');
           console.log('decoded: ',decoded);
           console.log('\n\n\n');
-          
+          console.log(' ***** 🔍 AddSupplierScreen.js ***** → user.isFullAccess: ', user.isFullAccess);
           
       }
       
@@ -544,6 +545,11 @@ import {
 
             {/* Add Supplier Button */}
             <AddSupplierButton onPress={() => handleSubmitCreateSupplier() } disabled={isDisabled} loading={isLoading} label={labelButton}/>
+
+            {/* Message avertissement freemium   */}
+            {user && !user.isFullAccess && (
+              <FreemiumNotice/>
+          )}
 
 
         </ScrollView>

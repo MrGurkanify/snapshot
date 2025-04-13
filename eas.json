@@ -15,12 +15,13 @@
       "ios": {
         "buildConfiguration": "Release",
         "simulator": false,
-        "autoIncrement": "version",
-        "distribution": "app-store"
+        
+        "distribution": "store"
       },
       "android": {
-        "buildType": "aab"
-      },
+      "buildType": "apk"
+    },
+
       "autoIncrement": true
     }
   },

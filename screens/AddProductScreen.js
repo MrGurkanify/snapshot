@@ -29,6 +29,8 @@ import NoteArea from '../components/home/NoteArea';
 import AddPhotoButton from '../components/home/AddPhotoButton';
 import AddSupplierButton from '../components/home/AddSupplierButton';
 import ImageViewer from '../components/home/ImageViewer';
+import FreemiumNotice from '../ui/FreemiumNotice';
+
 
 import { API_BASE_URL, API_CDN_URL } from '../lib/api';
 import { userSession } from '../lib/userSession';
@@ -63,6 +65,7 @@ export default function AddProductScreen() {
       setUser({
         token: session.token,
         userId: session.decoded.userId,
+        isFullAccess: session.decoded.isFullAccess,
       });
     };
     loadSession();
@@ -296,6 +299,11 @@ export default function AddProductScreen() {
           disabled={isDisabled}
           loading={isLoading}
         />
+
+        {/* Message avertissement freemium   */}
+          {user && !user.isFullAccess && (
+                      <FreemiumNotice/>
+          )}
       </ScrollView>
     </KeyboardAvoidingView>
   );
