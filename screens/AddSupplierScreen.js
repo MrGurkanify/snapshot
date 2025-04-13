@@ -273,7 +273,7 @@ import {
                 type: 'image/jpeg',
               });
     
-              const res = await fetch(`${API_CDN_URL}/upload`, {
+              const res = await fetch(`${API_CDN_URL}/upload/supplier`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'multipart/form-data' },
                 body: formData,
